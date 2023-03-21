@@ -29,6 +29,27 @@ public class [%= namecamel %]Dto implements Serializable
   private [% if (property.transient) { %]transient[% } %] [%- property.typeDto %] [%= property.nameCamel %];
   [% }); %]
 
+  [% if (!lombok) { %]
+    [% properties.forEach(function(property) { %]
+  /** 
+   * Gets [%= property.name %] 
+   */
+  public [%- property.typeDto %] get[%= property.name%]()
+  {
+     return this.[%= property.nameCamel %];
+  }
+
+  /**
+   * Sets [%= property.name %]
+   * @param [%= property.nameCamel %]
+   */
+  public void set[%= property.name%]([%- property.typeDto %] [%= property.nameCamel %])
+  {
+    this.[%= property.nameCamel %] = [%= property.nameCamel %];
+  }
+    [% }); %]
+  [% } %]
+
   /**
    * {@inheritDoc}
    */

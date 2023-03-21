@@ -44,7 +44,7 @@ public class [%= namecamel %]DO implements Serializable
   [% } else if (property.manyToOne) { %]  @ManyToOne
   @JoinColumn(name = "[%= property.manyToOneConfig.joinColumn %]", referencedColumnName = "[%= property.manyToOneConfig.joinReferenceColumn %]")
   private [%- property.type %] [%= property.nameCamel %];
-  [% } else if (property.oneToMany) { %]  @OneToMany(mappedBy = "[%= property.oneToManyConfig.mappedBy %]")
+  [% } else if (property.oneToMany) { %]  @OneToMany(mappedBy = "[%= property.oneToManyConfig.mappedBy %]", fetch = FetchType.LAZY)
   private [%- property.type %] [%= property.nameCamel %];
   [% } else if (property.manyToMany) {%][% if (property.manyToManyConfig.mapped) { %]  @ManyToMany(mappedBy = "[%= property.manyToManyConfig.mappedBy %]", fetch = FetchType.LAZY)
   private [%- property.type %] [%= property.nameCamel %];[%} else {%]  @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
