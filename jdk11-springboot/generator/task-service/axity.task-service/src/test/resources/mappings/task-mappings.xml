@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings xmlns="http://dozermapper.github.io/schema/bean-mapping"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://dozermapper.github.io/schema/bean-mapping http://dozermapper.github.io/schema/bean-mapping.xsd">
+  
+  <mapping>
+    <class-a>com.axity.task.commons.dto.TaskDto</class-a>
+    <class-b>com.axity.task.model.TaskDO</class-b>
+    <field>
+      <a>id</a>
+      <b>id</b>
+    </field><field>
+      <a>name</a>
+      <b>name</b>
+    </field><field>
+      <a>status</a>
+      <b>status</b>
+    </field>
+  </mapping>
+  <mapping>
+    <class-a>com.axity.task.commons.dto.StatusDto</class-a>
+    <class-b>com.axity.task.model.StatusDO</class-b>
+    <field>
+      <a>id</a>
+      <b>id</b>
+    </field><field>
+      <a>name</a>
+      <b>name</b>
+    </field>
+  </mapping>
+</mappings>

@@ -1,0 +1,71 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.axity</groupId>
+    <artifactId>task</artifactId>
+    <version>1.0.0</version>
+  </parent>
+  <artifactId>task-api</artifactId>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.axity</groupId>
+      <artifactId>task-facade</artifactId>
+      <version>${project.parent.version}</version>
+    </dependency>
+  </dependencies>
+
+  <profiles>
+    <profile>
+      <id>local</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <spring.profiles.active>local</spring.profiles.active>
+      </properties>
+    </profile>
+    <profile>
+      <id>development</id>
+      <properties>
+        <spring.profiles.active>development</spring.profiles.active>
+      </properties>
+    </profile>
+    <profile>
+      <id>staging</id>
+      <properties>
+        <spring.profiles.active>staging</spring.profiles.active>
+      </properties>
+    </profile>
+    <profile>
+      <id>production</id>
+      <properties>
+        <spring.profiles.active>production</spring.profiles.active>
+      </properties>
+    </profile>
+  </profiles>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <profiles>
+            <profile>local</profile>
+            <profile>development</profile>
+            <profile>staging</profile>
+            <profile>production</profile>
+          </profiles>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

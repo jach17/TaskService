@@ -83,7 +83,6 @@ build/
 dist/
 
 #Generated Services
-/*-service/
 Dockerfile-*-service
 
 # End of https://www.gitignore.io/api/node,yeoman
