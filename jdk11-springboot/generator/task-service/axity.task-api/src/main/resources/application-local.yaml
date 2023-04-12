@@ -1,5 +1,3 @@
-
-    
 spring:
   config:
     activate:
@@ -8,8 +6,8 @@ spring:
   application:
     name: Arquetipo de Spring Boot
   jpa:
-    database: default
-    database-platform: org.hibernate.dialect.H2Dialect
+    database: MYSQL
+    database-platform: org.hibernate.dialect.MySQLDialect
     generate-ddl: false
     hibernate:
       ddl-auto: none
@@ -17,11 +15,10 @@ spring:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
+        dialect: org.hibernate.dialect.MySQLDialect
     show-sql: true
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: sa
-    
+    url: jdbc:mysql://localhost:3390/lease_tech
+    driver-class-name: com.mysql.jdbc.Driver
+    username: root
+    password: root
