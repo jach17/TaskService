@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.axity.task.commons.dto.StatusDto;
 import com.axity.task.commons.dto.TaskDto;
 import com.axity.task.commons.enums.ErrorCode;
 import com.axity.task.commons.exception.BusinessException;
@@ -80,21 +81,82 @@ class TaskServiceTest {
   }
 
   /**
-   * Test method for
+   * Test method for create Task happy path
    * {@link com.axity.task.service.impl.TaskServiceImpl#create(com.axity.task.commons.dto.TaskDto)}.
    */
   @Test
-  @Disabled("TODO: Actualizar la prueba de acuerdo a la entidad")
   void testCreate() {
+    // Data inicial
     var dto = new TaskDto();
-    // Crear de acuerdo a la entidad
+    dto.setName("Tarea como ejemplo");
+    dto.setStatus(getStatusDto(1, "Pendiente"));
 
+    // llamada
     var response = this.taskService.create(dto);
-    assertNotNull(response);
-    assertEquals(0, response.getHeader().getCode());
-    assertNotNull(response.getBody());
 
+    // validacion
+    assertNotNull(response);
+    assertEquals(ErrorCode.SUCCESSFULY_RESULT, response.getHeader().getCode());
+    assertNotNull(response.getBody());
     this.taskService.delete(dto.getId());
+  }
+
+  /**
+   * Test method for create Task without status
+   * {@link com.axity.task.service.impl.TaskServiceImpl#create(com.axity.task.commons.dto.TaskDto)}.
+   */
+  @Test
+  void testCreateWithOutStatus() {
+    // data inicial
+    var dto = new TaskDto();
+    dto.setName("Tarea como ejemplo");
+    // llamada
+    var response = this.taskService.create(dto);
+    // validacion
+    assertNotNull(response);
+    assertEquals(ErrorCode.REQUIRED_FIELD.getCode(), response.getHeader().getCode());
+    assertNull(response.getBody());
+  }
+
+  /**
+   * Test method for create Task without name
+   * {@link com.axity.task.service.impl.TaskServiceImpl#create(com.axity.task.commons.dto.TaskDto)}.
+   */
+  @Test
+  void testCreateWithOutName() {
+    // data inicial
+    var dto = new TaskDto();
+    dto.setStatus(getStatusDto(1, "Pendiente"));
+    // llamada
+    var response = this.taskService.create(dto);
+    // validacion
+    assertNotNull(response);
+    assertEquals(ErrorCode.REQUIRED_FIELD.getCode(), response.getHeader().getCode());
+    assertNull(response.getBody());
+  }
+
+  private StatusDto getStatusDto(int type, String name) {
+    StatusDto status = new StatusDto();
+    status.setId(type);
+    status.setName(name);
+    return status;
+  }
+
+  /**
+   * Test method for create Task empty data
+   * {@link com.axity.task.service.impl.TaskServiceImpl#create(com.axity.task.commons.dto.TaskDto)}.
+   */
+  @Test
+  void testCreateWithEmptyData() {
+    // data inicial
+    var dto = new TaskDto();
+    // llamada
+    var response = this.taskService.create(dto);
+    // validacion
+    LOG.info("Response -> " + response);
+    assertNotNull(response);
+    assertEquals(ErrorCode.REQUIRED_FIELD.getCode(), response.getHeader().getCode());
+    assertNull(response.getBody());
   }
 
   /**
