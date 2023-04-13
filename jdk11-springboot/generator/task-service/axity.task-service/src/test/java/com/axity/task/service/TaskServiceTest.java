@@ -160,22 +160,26 @@ class TaskServiceTest {
   }
 
   /**
-   * Method to validate update
+   * Method to validate update happy path
    */
   @Test
-  @Disabled("TODO: Actualizar la prueba de acuerdo a la entidad")
   void testUpdate() {
+    // Data inicial
     var task = this.taskService.find(1).getBody();
-    // TODO: actualizar de acuerdo a la entidad
+    var nameUpdated = "Nombre actualizado";
 
+    task.setName(nameUpdated);
+    // llamada
     var response = this.taskService.update(task);
 
+    // validacion
     assertNotNull(response);
-    assertEquals(0, response.getHeader().getCode());
+    assertEquals(ErrorCode.SUCCESSFULY_RESULT.getCode(), response.getHeader().getCode());
     assertTrue(response.getBody());
     task = this.taskService.find(1).getBody();
 
     // Verificar que se actualice el valor
+    assertEquals(task.getName(), nameUpdated);
   }
 
   /**

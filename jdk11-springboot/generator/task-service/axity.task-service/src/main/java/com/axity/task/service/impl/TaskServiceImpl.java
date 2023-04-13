@@ -127,7 +127,6 @@ public class TaskServiceImpl implements TaskService {
     var entity = optional.get();
 
     entity.setName(dto.getName());
-    // TODO: Actualizar entity.Status (?)
 
     this.taskPersistence.save(entity);
 
