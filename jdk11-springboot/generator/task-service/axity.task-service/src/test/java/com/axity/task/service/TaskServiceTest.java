@@ -96,7 +96,7 @@ class TaskServiceTest {
 
     // validacion
     assertNotNull(response);
-    assertEquals(ErrorCode.SUCCESSFULY_RESULT, response.getHeader().getCode());
+    assertEquals(ErrorCode.SUCCESSFULY_RESULT.getCode(), response.getHeader().getCode());
     assertNotNull(response.getBody());
     this.taskService.delete(dto.getId());
   }
