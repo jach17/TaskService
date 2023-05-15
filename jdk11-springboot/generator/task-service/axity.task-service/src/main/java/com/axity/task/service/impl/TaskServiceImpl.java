@@ -89,24 +89,36 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public GenericResponseDto<TaskDto> create(TaskDto dto) {
+        var response = validateTaskData(dto);
+        if (isResponseCodeSuccessfully(response.getHeader().getCode())) {
+            TaskDO entity = new TaskDO();
+            this.mapper.map(dto, entity);
+            entity.setId(null);
+            this.taskPersistence.save(entity);
+            dto.setId(entity.getId());
+            return new GenericResponseDto<>(dto);
+        } else {
+            return response;
+        }
+    }
+
+    private boolean isResponseCodeSuccessfully(int responseCode) {
+        return responseCode == ErrorCode.SUCCESSFULY_RESULT.getCode();
+    }
+
+    private GenericResponseDto<TaskDto> validateTaskData(TaskDto dto) {
+
+        var response = getGenericResponse(ErrorCode.SUCCESSFULY_RESULT.getCode(), "OK");
         if (dto.getStatus() == null) {
-            return getGenericResponse(ErrorCode.REQUIRED_FIELD.getCode(), "No se encontró un estatus en la tarea");
+            response = getGenericResponse(ErrorCode.REQUIRED_FIELD.getCode(), "No se encontró un estatus en la tarea");
         }
         if (invalidateStatusData(dto.getStatus())) {
-            return getGenericResponse(ErrorCode.REQUIRED_FIELD.getCode(), "Información del status inválida");
+            response = getGenericResponse(ErrorCode.REQUIRED_FIELD.getCode(), "Información del status inválida");
         }
         if (dto.getName() == null) {
-            return getGenericResponse(ErrorCode.REQUIRED_FIELD.getCode(), "No se encontró un nombre para la tarea");
+            response = getGenericResponse(ErrorCode.REQUIRED_FIELD.getCode(), "No se encontró un nombre para la tarea");
         }
-        TaskDO entity = new TaskDO();
-        this.mapper.map(dto, entity);
-        entity.setId(null);
-
-        this.taskPersistence.save(entity);
-
-        dto.setId(entity.getId());
-
-        return new GenericResponseDto<>(dto);
+        return response;
     }
 
     private boolean invalidateStatusData(StatusDto status) {
