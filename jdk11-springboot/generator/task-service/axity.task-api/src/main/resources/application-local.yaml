@@ -18,7 +18,7 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
     show-sql: true
   datasource:
-    url: jdbc:mysql://localhost:3390/lease_tech
+    url: jdbc:mysql://docker-db-1:3306/lease_tech
     driver-class-name: com.mysql.jdbc.Driver
     username: root
     password: root

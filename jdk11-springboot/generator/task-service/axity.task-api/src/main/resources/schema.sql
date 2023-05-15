@@ -1,3 +1,5 @@
+CREATE DATABASE IF NOT EXISTS lease_tech;
+USE lease_tech;
 DROP TABLE IF EXISTS TBL_Task;
 DROP TABLE IF EXISTS TBL_Status;
 -- Crear tabla "Status"
