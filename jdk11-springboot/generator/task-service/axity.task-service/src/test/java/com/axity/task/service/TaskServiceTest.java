@@ -34,175 +34,196 @@ import com.axity.task.commons.request.PaginatedRequestDto;
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 @Transactional
 class TaskServiceTest {
-  private static final Logger LOG = LoggerFactory.getLogger(TaskServiceTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TaskServiceTest.class);
 
-  @Autowired
-  private TaskService taskService;
+    @Autowired
+    private TaskService taskService;
 
-  /**
-   * Method to validate the paginated search
-   */
-  @Test
-  void testFindTasks() {
-    var request = new PaginatedRequestDto();
-    request.setLimit(5);
-    request.setOffset(0);
-    var tasks = this.taskService.findTasks(request);
+    /**
+     * Method to validate the paginated search
+     */
+    @Test
+    void testFindTasks() {
+        var request = new PaginatedRequestDto();
+        request.setLimit(5);
+        request.setOffset(0);
+        var tasks = this.taskService.findTasks(request);
 
-    LOG.info("Response: {}", tasks);
+        LOG.info("Response: {}", tasks);
 
-    assertNotNull(tasks);
-    assertNotNull(tasks.getData());
-    assertFalse(tasks.getData().isEmpty());
-  }
+        assertNotNull(tasks);
+        assertNotNull(tasks.getData());
+        assertFalse(tasks.getData().isEmpty());
+    }
 
-  /**
-   * Method to validate the search by id
-   * 
-   * @param taskId
-   */
-  @ParameterizedTest
-  @ValueSource(ints = { 1 })
-  void testFind(Integer taskId) {
-    var task = this.taskService.find(taskId);
-    assertNotNull(task);
-    assertNotEquals(0, task.getBody().getId());
-    assertNotEquals(ErrorCode.TASK_NOT_FOUND, task.getHeader().getCode());
-    LOG.info("Response: {}", task);
-  }
+    /**
+     * Method to validate the search by id
+     * 
+     * @param taskId
+     */
+    @ParameterizedTest
+    @ValueSource(ints = { 1 })
+    void testFind(Integer taskId) {
+        var task = this.taskService.find(taskId);
+        assertNotNull(task);
+        assertNotEquals(0, task.getBody().getId());
+        assertNotEquals(ErrorCode.TASK_NOT_FOUND, task.getHeader().getCode());
+        LOG.info("Response: {}", task);
+    }
 
-  /**
-   * Method to validate the search by id inexistent
-   */
-  @Test
-  void testFind_NotExists() {
-    var task = this.taskService.find(999999);
-    assertNull(task);
-  }
+    /**
+     * Method to validate the search by id inexistent
+     */
+    @Test
+    void testFind_NotExists() {
+        var task = this.taskService.find(999999);
+        assertNull(task);
+    }
 
-  /**
-   * Test method for create Task happy path
-   * {@link com.axity.task.service.impl.TaskServiceImpl#create(com.axity.task.commons.dto.TaskDto)}.
-   */
-  @Test
-  void testCreate() {
-    // Data inicial
-    var dto = new TaskDto();
-    dto.setName("Tarea como ejemplo");
-    dto.setStatus(getStatusDto(1, "Pendiente"));
+    /**
+     * Test method for create Task happy path
+     * {@link com.axity.task.service.impl.TaskServiceImpl#create(com.axity.task.commons.dto.TaskDto)}.
+     */
+    @Test
+    void testCreate() {
+        // Data inicial
+        var dto = new TaskDto();
+        dto.setName("Tarea como ejemplo");
+        dto.setStatus(getStatusDto(1, "Pendiente"));
 
-    // llamada
-    var response = this.taskService.create(dto);
+        System.out.println("Valor de DTO: " + dto);
+        // llamada
+        var response = this.taskService.create(dto);
 
-    // validacion
-    assertNotNull(response);
-    assertEquals(ErrorCode.SUCCESSFULY_RESULT.getCode(), response.getHeader().getCode());
-    assertNotNull(response.getBody());
-    this.taskService.delete(dto.getId());
-  }
+        // validacion
+        assertNotNull(response);
+        assertEquals(ErrorCode.SUCCESSFULY_RESULT.getCode(), response.getHeader().getCode());
+        assertNotNull(response.getBody());
+        this.taskService.delete(dto.getId());
+    }
 
-  /**
-   * Test method for create Task without status
-   * {@link com.axity.task.service.impl.TaskServiceImpl#create(com.axity.task.commons.dto.TaskDto)}.
-   */
-  @Test
-  void testCreateWithOutStatus() {
-    // data inicial
-    var dto = new TaskDto();
-    dto.setName("Tarea como ejemplo");
-    // llamada
-    var response = this.taskService.create(dto);
-    // validacion
-    assertNotNull(response);
-    assertEquals(ErrorCode.REQUIRED_FIELD.getCode(), response.getHeader().getCode());
-    assertNull(response.getBody());
-  }
+    /**
+     * Test method for create Task without status
+     * {@link com.axity.task.service.impl.TaskServiceImpl#create(com.axity.task.commons.dto.TaskDto)}.
+     */
+    @Test
+    void testCreateWithOutStatus() {
+        // data inicial
+        var dto = new TaskDto();
+        dto.setName("Tarea como ejemplo");
+        // llamada
+        var response = this.taskService.create(dto);
+        // validacion
+        assertNotNull(response);
+        assertEquals(ErrorCode.REQUIRED_FIELD.getCode(), response.getHeader().getCode());
+        assertNull(response.getBody());
+    }
 
-  /**
-   * Test method for create Task without name
-   * {@link com.axity.task.service.impl.TaskServiceImpl#create(com.axity.task.commons.dto.TaskDto)}.
-   */
-  @Test
-  void testCreateWithOutName() {
-    // data inicial
-    var dto = new TaskDto();
-    dto.setStatus(getStatusDto(1, "Pendiente"));
-    // llamada
-    var response = this.taskService.create(dto);
-    // validacion
-    assertNotNull(response);
-    assertEquals(ErrorCode.REQUIRED_FIELD.getCode(), response.getHeader().getCode());
-    assertNull(response.getBody());
-  }
+    /**
+     * Test method for create task with status data invalid
+     */
 
-  private StatusDto getStatusDto(int type, String name) {
-    StatusDto status = new StatusDto();
-    status.setId(type);
-    status.setName(name);
-    return status;
-  }
+    @Test
+    void testCreateWithDataStatusInvalid() {
 
-  /**
-   * Test method for create Task empty data
-   * {@link com.axity.task.service.impl.TaskServiceImpl#create(com.axity.task.commons.dto.TaskDto)}.
-   */
-  @Test
-  void testCreateWithEmptyData() {
-    // data inicial
-    var dto = new TaskDto();
-    // llamada
-    var response = this.taskService.create(dto);
-    // validacion
-    LOG.info("Response -> " + response);
-    assertNotNull(response);
-    assertEquals(ErrorCode.REQUIRED_FIELD.getCode(), response.getHeader().getCode());
-    assertNull(response.getBody());
-  }
+        // data inicial
+        var dto = new TaskDto();
+        dto.setName("Tarea como ejemplo");
+        // Status invalid info
+        dto.setStatus(new StatusDto());
 
-  /**
-   * Method to validate update happy path
-   */
-  @Test
-  void testUpdate() {
-    // Data inicial
-    var task = this.taskService.find(1).getBody();
-    var nameUpdated = "Nombre actualizado";
+        // llamada
+        var response = this.taskService.create(dto);
 
-    task.setName(nameUpdated);
-    // llamada
-    var response = this.taskService.update(task);
+        // validacion
+        assertNotNull(response);
+    }
 
-    // validacion
-    assertNotNull(response);
-    assertEquals(ErrorCode.SUCCESSFULY_RESULT.getCode(), response.getHeader().getCode());
-    assertTrue(response.getBody());
-    task = this.taskService.find(1).getBody();
+    /**
+     * Test method for create Task without name
+     * {@link com.axity.task.service.impl.TaskServiceImpl#create(com.axity.task.commons.dto.TaskDto)}.
+     */
+    @Test
+    void testCreateWithOutName() {
+        // data inicial
+        var dto = new TaskDto();
+        dto.setStatus(getStatusDto(1, "Pendiente"));
+        // llamada
+        var response = this.taskService.create(dto);
+        // validacion
+        assertNotNull(response);
+        assertEquals(ErrorCode.REQUIRED_FIELD.getCode(), response.getHeader().getCode());
+        assertNull(response.getBody());
+    }
 
-    // Verificar que se actualice el valor
-    assertEquals(task.getName(), nameUpdated);
-  }
+    private StatusDto getStatusDto(int type, String name) {
+        StatusDto status = new StatusDto();
+        status.setId(type);
+        status.setName(name);
+        return status;
+    }
 
-  /**
-   * Method to validate an inexistent registry
-   */
-  @Test
-  void testUpdate_NotFound() {
-    var task = new TaskDto();
-    task.setId(999999);
-    var ex = assertThrows(BusinessException.class, () -> this.taskService.update(task));
+    /**
+     * Test method for create Task empty data
+     * {@link com.axity.task.service.impl.TaskServiceImpl#create(com.axity.task.commons.dto.TaskDto)}.
+     */
+    @Test
+    void testCreateWithEmptyData() {
+        // data inicial
+        var dto = new TaskDto();
+        // llamada
+        var response = this.taskService.create(dto);
+        // validacion
+        LOG.info("Response -> " + response);
+        assertNotNull(response);
+        assertEquals(ErrorCode.REQUIRED_FIELD.getCode(), response.getHeader().getCode());
+        assertNull(response.getBody());
+    }
 
-    assertEquals(ErrorCode.TASK_NOT_FOUND.getCode(), ex.getCode());
-  }
+    /**
+     * Method to validate update happy path
+     */
+    @Test
+    void testUpdate() {
+        // Data inicial
+        var task = this.taskService.find(1).getBody();
+        var nameUpdated = "Nombre actualizado";
 
-  /**
-   * Test method for
-   * {@link com.axity.task.service.impl.TaskServiceImpl#delete(java.lang.String)}.
-   */
-  @Test
-  void testDeleteNotFound() {
-    var ex = assertThrows(BusinessException.class, () -> this.taskService.delete(999999));
-    assertEquals(ErrorCode.TASK_NOT_FOUND.getCode(), ex.getCode());
-  }
+        task.setName(nameUpdated);
+        // llamada
+        var response = this.taskService.update(task);
+
+        // validacion
+        assertNotNull(response);
+        assertEquals(ErrorCode.SUCCESSFULY_RESULT.getCode(), response.getHeader().getCode());
+        assertTrue(response.getBody());
+        task = this.taskService.find(1).getBody();
+
+        // Verificar que se actualice el valor
+        assertEquals(task.getName(), nameUpdated);
+    }
+
+    /**
+     * Method to validate an inexistent registry
+     */
+    @Test
+    void testUpdate_NotFound() {
+        var task = new TaskDto();
+        task.setId(999999);
+        var ex = assertThrows(BusinessException.class, () -> this.taskService.update(task));
+
+        assertEquals(ErrorCode.TASK_NOT_FOUND.getCode(), ex.getCode());
+    }
+
+    /**
+     * Test method for
+     * {@link com.axity.task.service.impl.TaskServiceImpl#delete(java.lang.String)}.
+     */
+    @Test
+    void testDeleteNotFound() {
+        var ex = assertThrows(BusinessException.class, () -> this.taskService.delete(999999));
+        assertEquals(ErrorCode.TASK_NOT_FOUND.getCode(), ex.getCode());
+    }
 }
 
 /***

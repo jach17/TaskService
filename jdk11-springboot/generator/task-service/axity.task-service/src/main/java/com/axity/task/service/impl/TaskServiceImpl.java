@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.axity.task.commons.dto.StatusDto;
 import com.axity.task.commons.dto.TaskDto;
 import com.axity.task.commons.enums.ErrorCode;
 import com.axity.task.commons.exception.BusinessException;
@@ -42,118 +43,132 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 @Slf4j
 public class TaskServiceImpl implements TaskService {
-  @Autowired
-  private TaskPersistence taskPersistence;
+    @Autowired
+    private TaskPersistence taskPersistence;
 
-  @Autowired
-  private Mapper mapper;
+    @Autowired
+    private Mapper mapper;
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public PaginatedResponseDto<TaskDto> findTasks(PaginatedRequestDto request) {
-    log.debug("%s", request);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PaginatedResponseDto<TaskDto> findTasks(PaginatedRequestDto request) {
+        log.debug("%s", request);
 
-    int page = request.getOffset() / request.getLimit();
-    Pageable pageRequest = PageRequest.of(page, request.getLimit(), Sort.by("id"));
+        int page = request.getOffset() / request.getLimit();
+        Pageable pageRequest = PageRequest.of(page, request.getLimit(), Sort.by("id"));
 
-    var paged = this.taskPersistence.findAll(pageRequest);
+        var paged = this.taskPersistence.findAll(pageRequest);
 
-    var result = new PaginatedResponseDto<TaskDto>(page, request.getLimit(), paged.getTotalElements());
+        var result = new PaginatedResponseDto<TaskDto>(page, request.getLimit(), paged.getTotalElements());
 
-    paged.stream().forEach(x -> result.getData().add(this.transform(x)));
+        paged.stream().forEach(x -> result.getData().add(this.transform(x)));
 
-    return result;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public GenericResponseDto<TaskDto> find(Integer id) {
-    GenericResponseDto<TaskDto> response = null;
-
-    var optional = this.taskPersistence.findById(id);
-    if (optional.isPresent()) {
-      response = new GenericResponseDto<>();
-      response.setBody(this.transform(optional.get()));
+        return result;
     }
 
-    return response;
-  }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GenericResponseDto<TaskDto> find(Integer id) {
+        GenericResponseDto<TaskDto> response = null;
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public GenericResponseDto<TaskDto> create(TaskDto dto) {
-    if (dto.getStatus() == null) {
-      return getGenericResponse(ErrorCode.REQUIRED_FIELD.getCode(), "No se encontró un estatus en la tarea");
-    }
-    if (dto.getName() == null) {
-      return getGenericResponse(ErrorCode.REQUIRED_FIELD.getCode(), "No se encontró un nombre para la tarea");
-    }
-    TaskDO entity = new TaskDO();
-    this.mapper.map(dto, entity);
-    entity.setId(null);
+        var optional = this.taskPersistence.findById(id);
+        if (optional.isPresent()) {
+            response = new GenericResponseDto<>();
+            response.setBody(this.transform(optional.get()));
+        }
 
-    this.taskPersistence.save(entity);
-
-    dto.setId(entity.getId());
-
-    return new GenericResponseDto<>(dto);
-  }
-
-  private GenericResponseDto<TaskDto> getGenericResponse(int code, String msg) {
-    var response = new GenericResponseDto<TaskDto>();
-    var header = new HeaderDto();
-    header.setCode(code);
-    header.setMessage(msg);
-    response.setHeader(header);
-    return response;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public GenericResponseDto<Boolean> update(TaskDto dto) {
-    var optional = this.taskPersistence.findById(dto.getId());
-    if (optional.isEmpty()) {
-      throw new BusinessException(ErrorCode.TASK_NOT_FOUND);
+        return response;
     }
 
-    var entity = optional.get();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GenericResponseDto<TaskDto> create(TaskDto dto) {
+        if (dto.getStatus() == null) {
+            return getGenericResponse(ErrorCode.REQUIRED_FIELD.getCode(), "No se encontró un estatus en la tarea");
+        }
+        if (invalidateStatusData(dto.getStatus())) {
+            return getGenericResponse(ErrorCode.REQUIRED_FIELD.getCode(), "Información del status inválida");
+        }
+        if (dto.getName() == null) {
+            return getGenericResponse(ErrorCode.REQUIRED_FIELD.getCode(), "No se encontró un nombre para la tarea");
+        }
+        TaskDO entity = new TaskDO();
+        this.mapper.map(dto, entity);
+        entity.setId(null);
 
-    entity.setName(dto.getName());
+        this.taskPersistence.save(entity);
 
-    this.taskPersistence.save(entity);
+        dto.setId(entity.getId());
 
-    return new GenericResponseDto<>(true);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public GenericResponseDto<Boolean> delete(Integer id) {
-    var optional = this.taskPersistence.findById(id);
-    if (optional.isEmpty()) {
-      throw new BusinessException(ErrorCode.TASK_NOT_FOUND);
+        return new GenericResponseDto<>(dto);
     }
 
-    var entity = optional.get();
-    this.taskPersistence.delete(entity);
-
-    return new GenericResponseDto<>(true);
-  }
-
-  private TaskDto transform(TaskDO entity) {
-    TaskDto dto = null;
-    if (entity != null) {
-      dto = this.mapper.map(entity, TaskDto.class);
+    private boolean invalidateStatusData(StatusDto status) {
+        if (status.getId() == null) {
+            return true;
+        }
+        if (status.getName() == null) {
+            return true;
+        } else {
+            return false;
+        }
     }
-    return dto;
-  }
+
+    private GenericResponseDto<TaskDto> getGenericResponse(int code, String msg) {
+        var response = new GenericResponseDto<TaskDto>();
+        var header = new HeaderDto();
+        header.setCode(code);
+        header.setMessage(msg);
+        response.setHeader(header);
+        return response;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GenericResponseDto<Boolean> update(TaskDto dto) {
+        var optional = this.taskPersistence.findById(dto.getId());
+        if (optional.isEmpty()) {
+            throw new BusinessException(ErrorCode.TASK_NOT_FOUND);
+        }
+
+        var entity = optional.get();
+
+        entity.setName(dto.getName());
+
+        this.taskPersistence.save(entity);
+
+        return new GenericResponseDto<>(true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GenericResponseDto<Boolean> delete(Integer id) {
+        var optional = this.taskPersistence.findById(id);
+        if (optional.isEmpty()) {
+            throw new BusinessException(ErrorCode.TASK_NOT_FOUND);
+        }
+
+        var entity = optional.get();
+        this.taskPersistence.delete(entity);
+
+        return new GenericResponseDto<>(true);
+    }
+
+    private TaskDto transform(TaskDO entity) {
+        TaskDto dto = null;
+        if (entity != null) {
+            dto = this.mapper.map(entity, TaskDto.class);
+        }
+        return dto;
+    }
 }
